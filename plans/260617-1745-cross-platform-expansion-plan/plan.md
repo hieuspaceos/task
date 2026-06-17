@@ -115,17 +115,83 @@ IndexedDB (local) ←→ Firebase Firestore (cloud) ←→ All devices
 
 ---
 
-## Open Questions (Pending User Input)
+## User Requirements (Finalized)
 
-1. **Auth requirement?** Individual accounts per user, or shared device sync?
-2. **Offline priority?** Full offline needed, or internet required?
-3. **Play Store?** Publish to Play Store, or PWA installable is enough?
-4. **Extension scope?** Full features, or "quick add task" popup only?
-5. **Data size?** Tasks/goals per user? (Affects pricing)
+| Question | Answer |
+|----------|--------|
+| Auth | ❌ No auth needed |
+| Sync | ✅ Online sync giữa 4 thiết bị: Mac, Windows, Android, Chrome Extension |
+| Play Store | ❌ Không cần - chỉ cần cài APK trực tiếp |
+| Extension | ✅ Full features (đầy đủ như desktop) |
+| Users | 👤 1 user duy nhất (cá nhân) |
+
+**Firebase free tier: Đủ dùng cho 1 user với lượng task thông thường.**
 
 ---
 
-## Export Format (for Option 3 fallback)
+## Implementation Phases
+
+### [Phase 1: Data Layer Refactor](./phase-01-data-layer.md)
+- Replace localStorage with IndexedDB (Dexie.js)
+- Keep existing API compatible
+- Duration: ~1 day
+
+### [Phase 2: Firebase Sync](./phase-02-firebase-sync.md)
+- Simple device-based sync (no auth needed)
+- Firestore real-time sync across all devices
+- Handle offline/online states
+- Duration: ~2 days
+
+### [Phase 3: PWA + Chrome Extension](./phase-03-pwa-and-chrome-extension.md)
+- PWA manifest + service worker
+- Chrome Extension (Manifest V3) with full features
+- Share sync layer with PWA
+- Duration: ~2 days
+
+### [Phase 4: Android APK](./phase-04-android-apk.md)
+- Tauri mobile for Android
+- Generate APK via `npm run tauri android`
+- Use same synced data layer
+- Duration: ~1 day
+
+**Total: ~6 days**
+
+---
+
+## Phase Files
+
+| Phase | File | Status |
+|-------|------|--------|
+| 1. Data Layer | `phase-01-data-layer.md` | ✅ Created |
+| 2. Firebase Sync | `phase-02-firebase-sync.md` | ✅ Created |
+| 3. PWA + Extension | `phase-03-pwa-and-chrome-extension.md` | ✅ Created |
+| 4. Android APK | `phase-04-android-apk.md` | ✅ Created |
+
+---
+
+## Architecture
+
+```
+┌─────────┐     ┌─────────┐
+│   Mac   │────▶│         │
+└─────────┘     │         │
+┌─────────┐     │         │
+│ Windows │────▶│Firebase │
+└─────────┘     │Firestore│
+┌─────────┐     │         │
+│ Android │◀────│         │
+└─────────┘     │         │
+┌─────────┐     │         │
+│ Chrome  │────▶│         │
+│Extension│     └─────────┘
+└─────────┘
+```
+
+**No auth** → Use single Firebase project, devices sync via same Firestore collection.
+
+---
+
+## Export Format (for backup)
 
 ```json
 {
