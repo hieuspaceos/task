@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eisenhower Task</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="input-bar">
+      <input type="text" id="task-input" placeholder="Nhập task..." autocomplete="off" />
+      <button id="reset-btn" title="Xóa tất cả">↻</button>
+      <button id="notification-btn" class="notification-btn" title="Thông báo">
+        <span class="notification-icon">🔔</span>
+        <span id="notification-badge" class="notification-badge" style="display:none">0</span>
+      </button>
+    </header>
+
+    <!-- Notification Panel -->
+    <div id="notification-panel" class="notification-panel" style="display:none">
+      <div class="notification-header">
+        <h3>Thông báo</h3>
+        <button id="mark-all-read-btn" class="mark-read-btn">Đánh dấu đã đọc</button>
+      </div>
+      <div id="notification-list" class="notification-list"></div>
+    </div>
+
+    <div class="main-layout">
+      <main class="matrix">
+        <div class="quadrant" data-quadrant="1">
+          <h2>Q1 <span class="label-vn">LÀM NGAY</span></h2>
+          <ul class="task-list" data-quadrant="1"></ul>
+        </div>
+        <div class="quadrant" data-quadrant="2">
+          <h2>Q2 <span class="label-vn">LÊN LỊCH</span></h2>
+          <ul class="task-list" data-quadrant="2"></ul>
+        </div>
+        <div class="quadrant" data-quadrant="3">
+          <h2>Q3 <span class="label-vn">ỦY THÁC</span></h2>
+          <ul class="task-list" data-quadrant="3"></ul>
+        </div>
+        <div class="quadrant" data-quadrant="4">
+          <h2>Q4 <span class="label-vn">ĐỂ SAU</span></h2>
+          <ul class="task-list" data-quadrant="4"></ul>
+        </div>
+      </main>
+
+      <aside class="sidebar">
+        <!-- Pomodoro Section -->
+        <div class="pomodoro-section">
+          <h3>Pomodoro</h3>
+          <div class="pomodoro-timer">
+            <div id="pomodoro-progress" class="pomodoro-progress"></div>
+            <span id="pomodoro-display" class="pomodoro-display">25:00</span>
+          </div>
+          <div class="pomodoro-controls">
+            <button id="pomodoro-start" class="pomodoro-btn start">▶ Bắt đầu</button>
+            <button id="pomodoro-pause" class="pomodoro-btn pause" style="display:none">⏸ Tạm dừng</button>
+            <button id="pomodoro-reset" class="pomodoro-btn reset">↺</button>
+          </div>
+          <div class="pomodoro-duration">
+            <label>Phút:</label>
+            <input type="number" id="pomodoro-duration" min="1" max="120" value="25" />
+          </div>
+          <button id="test-notification" class="pomodoro-btn test-btn">🔔 Test Notification</button>
+        </div>
+
+        <!-- Goals Section -->
+        <div class="goals-section">
+          <h3>Mục tiêu</h3>
+          <div class="goals-input-row">
+            <input type="text" id="goals-input" placeholder="Thêm mục tiêu..." autocomplete="off" />
+            <button id="goals-add-btn" class="add-goal-btn">+</button>
+          </div>
+          <div id="goals-container" class="goals-container"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings-section">
+          <h3>Cài đặt</h3>
+          <button id="api-key-toggle" class="toggle-btn">🔑 API Key</button>
+          <div id="api-key-section" class="api-key-section" style="display: none;">
+            <input type="password" id="api-key-input" placeholder="MiniMax API Key..." />
+            <button id="api-key-save-btn" class="save-key-btn">Lưu</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

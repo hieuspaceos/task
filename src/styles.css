@@ -1,0 +1,988 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.input-bar {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#task-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#task-input:focus {
+  border-color: #2563eb;
+}
+
+#reset-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+#reset-btn:hover {
+  background-color: #f0f0f0;
+}
+
+/* Main Layout */
+.main-layout {
+  display: flex;
+  gap: 16px;
+}
+
+.matrix {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Pomodoro Section */
+.pomodoro-section {
+  background: white;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pomodoro-section h3 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.pomodoro-timer {
+  position: relative;
+  height: 80px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.pomodoro-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: #22c55e;
+  transition: width 1s linear;
+  width: 100%;
+}
+
+.pomodoro-display {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  font-variant-numeric: tabular-nums;
+}
+
+.pomodoro-controls {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.pomodoro-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s;
+}
+
+.pomodoro-btn.start {
+  background: #22c55e;
+  color: white;
+}
+
+.pomodoro-btn.start:hover {
+  background: #16a34a;
+}
+
+.pomodoro-btn.pause {
+  background: #f97316;
+  color: white;
+}
+
+.pomodoro-btn.pause:hover {
+  background: #ea580c;
+}
+
+.pomodoro-btn.reset {
+  background: #e5e7eb;
+  color: #333;
+  flex: 0;
+  width: 36px;
+}
+
+.pomodoro-btn.reset:hover {
+  background: #d1d5db;
+}
+
+.pomodoro-btn.test-btn {
+  width: 100%;
+  margin-top: 8px;
+  background: #8b5cf6;
+  color: white;
+}
+
+.pomodoro-btn.test-btn:hover {
+  background: #7c3aed;
+}
+
+.pomodoro-duration {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pomodoro-duration label {
+  font-size: 12px;
+  color: #666;
+}
+
+.pomodoro-duration input {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.goals-section {
+  background: white;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.goals-section h3 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.goals-input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+#goals-input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+#goals-input:focus {
+  border-color: #2563eb;
+}
+
+.add-goal-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-goal-btn:hover {
+  background: #1d4ed8;
+}
+
+.goals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.no-goals {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  padding: 16px 0;
+  line-height: 1.5;
+}
+
+/* Goal Card */
+.goal-card {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border-left: 4px solid #6366f1;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.goal-card:hover {
+  background: #f0f0f0;
+}
+
+.goal-card.selected {
+  background: #f0f0f0;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.goal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.goal-name {
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  padding-right: 8px;
+}
+
+.goal-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: #999;
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.goal-remove:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.goal-progress {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.goal-progress-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.goal-stats {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.goal-task-list {
+  margin-top: 8px;
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.goal-task-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 11px;
+  color: #555;
+}
+
+.goal-task-item.done {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.goal-task-check {
+  font-size: 10px;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.goal-task-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Settings */
+.settings-section {
+  background: white;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section h3 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.toggle-btn {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+}
+
+.toggle-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.api-key-section {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#api-key-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+#api-key-input:focus {
+  border-color: #2563eb;
+}
+
+.save-key-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #059669;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.save-key-btn:hover {
+  background: #047857;
+}
+
+/* Notification Bell Button */
+.notification-btn {
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.notification-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.notification-icon {
+  font-size: 18px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  background: #dc2626;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* Notification Panel Overlay */
+.notification-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+/* Notification Panel */
+.notification-panel {
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  width: 320px;
+  max-height: 480px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.mark-read-btn {
+  font-size: 12px;
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.mark-read-btn:hover {
+  background: #eff6ff;
+}
+
+.notification-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.notification-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: #888;
+  font-size: 13px;
+}
+
+.notification-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  margin-bottom: 4px;
+}
+
+.notification-item:hover {
+  background: #f5f5f5;
+}
+
+.notification-item.unread {
+  background: #eff6ff;
+}
+
+.notification-item.unread:hover {
+  background: #dbeafe;
+}
+
+.notification-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.notification-item-icon.pomodoro {
+  background: #fef3c7;
+}
+
+.notification-item-icon.task {
+  background: #dbeafe;
+}
+
+.notification-item-icon.success {
+  background: #d1fae5;
+}
+
+.notification-item-icon.error {
+  background: #fee2e2;
+}
+
+.notification-item-icon.info {
+  background: #e0e7ff;
+}
+
+.notification-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.notification-item-time {
+  font-size: 11px;
+  color: #888;
+}
+
+.notification-item-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.notification-item:hover .notification-item-actions {
+  opacity: 1;
+}
+
+.notification-dismiss {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #888;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-dismiss:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Matrix */
+.quadrant {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.quadrant h2 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.quadrant[data-quadrant="1"] h2 {
+  color: #dc2626;
+}
+
+.quadrant[data-quadrant="2"] h2 {
+  color: #2563eb;
+}
+
+.quadrant[data-quadrant="3"] h2 {
+  color: #ca8a04;
+}
+
+.quadrant[data-quadrant="4"] h2 {
+  color: #6b7280;
+}
+
+.label-vn {
+  font-weight: normal;
+  color: #888;
+  font-size: 12px;
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-height: 60px;
+}
+
+.task-list li {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: #fafafa;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s, background-color 0.2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.task-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.task-list li.done {
+  opacity: 0.6;
+}
+
+.task-list li.done .task-text {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.task-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-goal-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  color: white;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.task-btn {
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.task-list li:hover .task-btn {
+  opacity: 1;
+}
+
+.task-description {
+  width: 100%;
+  padding: 6px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex-basis: 100%;
+}
+
+.desc-toggle-btn {
+  flex-shrink: 0;
+}
+
+.tick-btn {
+  font-size: 14px;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.tick-btn:hover {
+  color: #22c55e;
+}
+
+.edit-btn:hover {
+  background-color: #e8f4ff;
+  color: #2563eb;
+}
+
+.delete-btn:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.task-list li.selected {
+  background-color: #dbeafe;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #2563eb;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 320px;
+}
+
+.modal-task-text {
+  font-size: 14px;
+  color: #666;
+  margin: 12px 0 16px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+.modal-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.q-btn {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.2s;
+}
+
+.q-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.q1-btn:hover { background-color: #fee2e2; border-color: #dc2626; color: #dc2626; }
+.q2-btn:hover { background-color: #dbeafe; border-color: #2563eb; color: #2563eb; }
+.q3-btn:hover { background-color: #fef9c3; border-color: #ca8a04; color: #ca8a04; }
+.q4-btn:hover { background-color: #f3f4f6; border-color: #6b7280; color: #6b7280; }
+
+/* Edit Modal */
+.edit-modal-content {
+  text-align: left;
+  min-width: 300px;
+}
+
+.edit-modal-content h3 {
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #333;
+}
+
+.edit-field {
+  margin-bottom: 12px;
+}
+
+.edit-field label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.edit-field input,
+.edit-field select,
+.edit-field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.edit-field input:focus,
+.edit-field select:focus,
+.edit-field textarea:focus {
+  border-color: #2563eb;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.save-btn, .cancel-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  border: none;
+}
+
+.save-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #1d4ed8;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+@media (max-width: 800px) {
+  .main-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .pomodoro-section {
+    flex: 1;
+    min-width: 200px;
+  }
+  .goals-section {
+    flex: 2;
+    min-width: 250px;
+  }
+  .settings-section {
+    flex: 1;
+    min-width: 150px;
+  }
+  .goals-container {
+    max-height: 150px;
+  }
+  .matrix {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .app {
+    padding: 10px;
+  }
+  .input-bar {
+    flex-wrap: wrap;
+  }
+  #task-input {
+    width: 100%;
+  }
+  #reset-btn {
+    width: 100%;
+  }
+  .quadrant {
+    padding: 10px;
+  }
+  .modal-content {
+    margin: 10px;
+    padding: 16px;
+  }
+  .edit-modal-content {
+    min-width: auto;
+    width: 95%;
+  }
+  .pomodoro-timer {
+    height: 60px;
+  }
+  .pomodoro-display {
+    font-size: 24px;
+  }
+}
