@@ -49,6 +49,24 @@
       </main>
 
       <aside class="sidebar">
+        <!-- Pomodoro Section - Desktop -->
+        <div class="pomodoro-section">
+          <h3>🍅 Pomodoro</h3>
+          <div class="pomodoro-timer">
+            <div id="pomodoro-progress" class="pomodoro-progress"></div>
+            <span id="pomodoro-display" class="pomodoro-display">25:00</span>
+          </div>
+          <div class="pomodoro-controls">
+            <button id="pomodoro-start" class="pomodoro-btn start">▶</button>
+            <button id="pomodoro-pause" class="pomodoro-btn pause" style="display:none">⏸</button>
+            <button id="pomodoro-reset" class="pomodoro-btn reset">↺</button>
+          </div>
+          <div class="pomodoro-duration">
+            <label>Phút:</label>
+            <input type="number" id="pomodoro-duration" min="1" max="120" value="25" />
+          </div>
+        </div>
+
         <!-- Goals Section - Compact -->
         <div class="goals-section">
           <div class="goals-input-row">
