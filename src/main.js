@@ -549,7 +549,7 @@ function setupGoalsUI() {
 input.addEventListener('keydown', e => {
   if (e.key === 'Enter') addTask(input.value);
 });
-resetBtn.addEventListener('click', reset);
+if (resetBtn) resetBtn.addEventListener('click', reset);
 
 // ============ POMODORO TIMER ============
 
