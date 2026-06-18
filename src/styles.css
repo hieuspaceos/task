@@ -1175,6 +1175,8 @@ body {
   }
   .pomodoro-popup {
     display: none;
+    visibility: hidden;
+    opacity: 0;
     position: fixed;
     top: 0;
     left: 0;
@@ -1184,8 +1186,11 @@ body {
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
   }
   .pomodoro-popup.show {
+    visibility: visible;
+    opacity: 1;
     display: flex;
   }
   .pomodoro-popup-content {
