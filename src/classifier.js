@@ -1,3 +1,5 @@
+import { getGoals as dbGetGoals, saveGoals as dbSaveGoals } from './db.js';
+
 const Q1_KEYWORDS = [
   // English
   'asap', 'deadline', 'urgent', 'hurry', 'critical', 'emergency', 'immediately', 'now', 'right now', 'right away',
@@ -47,20 +49,9 @@ const Q4_KEYWORDS = [
   'tiktok', 'youtube', 'facebook', 'instagram', 'twitter', 'reddit', 'tin đồn'
 ];
 
-// Goals for smarter classification
-const GOALS_KEY = 'eisenhower-goals';
-
-function getGoals() {
-  return JSON.parse(localStorage.getItem(GOALS_KEY) || '[]');
-}
-
-function saveGoals(goals) {
-  localStorage.setItem(GOALS_KEY, JSON.stringify(goals));
-}
-
 // Match task against user goals
-function matchGoals(text) {
-  const goals = getGoals();
+async function matchGoals(text) {
+  const goals = await dbGetGoals();
   if (goals.length === 0) return null;
 
   const lower = text.toLowerCase();
@@ -78,14 +69,6 @@ function matchGoals(text) {
 
 function classifyTask(text) {
   const lower = text.toLowerCase().trim();
-
-  // Check goals first - if matches a goal, likely Q2 (important but not urgent)
-  const matchedGoal = matchGoals(text);
-  if (matchedGoal) {
-    const q1Score = Q1_KEYWORDS.filter(k => lower.includes(k.toLowerCase())).length;
-    if (q1Score > 0) return 1;
-    return 2;
-  }
 
   // Q1: urgent + important
   const q1Score = Q1_KEYWORDS.filter(k => lower.includes(k.toLowerCase())).length;
@@ -144,4 +127,4 @@ async function classifyWithAI(text, apiKey) {
   }
 }
 
-export { classifyTask, classifyWithAI, getGoals, saveGoals };
+export { classifyTask, classifyWithAI };

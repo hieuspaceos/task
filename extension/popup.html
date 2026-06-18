@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Eisenhower Task</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <h1>Eisenhower Task</h1>
+      <button id="open-full-app" class="open-app-btn" title="Mở ứng dụng đầy đủ">↗</button>
+    </header>
+
+    <div class="quick-add">
+      <input type="text" id="quick-task-input" placeholder="Thêm task nhanh..." />
+      <button id="add-quick-task" class="add-btn">+</button>
+    </div>
+
+    <div class="quadrants-mini">
+      <div class="quadrant-mini" data-q="1">
+        <span class="q-label">Q1</span>
+        <ul id="q1-tasks" class="mini-task-list"></ul>
+      </div>
+      <div class="quadrant-mini" data-q="2">
+        <span class="q-label">Q2</span>
+        <ul id="q2-tasks" class="mini-task-list"></ul>
+      </div>
+      <div class="quadrant-mini" data-q="3">
+        <span class="q-label">Q3</span>
+        <ul id="q3-tasks" class="mini-task-list"></ul>
+      </div>
+      <div class="quadrant-mini" data-q="4">
+        <span class="q-label">Q4</span>
+        <ul id="q4-tasks" class="mini-task-list"></ul>
+      </div>
+    </div>
+
+    <div class="sync-status">
+      <span id="sync-indicator" class="sync-indicator">⚡</span>
+      <span id="sync-text">Đồng bộ</span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

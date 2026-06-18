@@ -1,18 +1,26 @@
-import { classifyTask, classifyWithAI, getGoals, saveGoals } from './classifier.js';
-import('@tauri-apps/plugin-notification').then(mod => {
-  window.__notificationPlugin = mod;
-  console.log('Notification plugin loaded');
-  // Request permission after plugin loads
-  if (mod && mod.requestPermission) {
-    mod.requestPermission().then(result => {
+import { classifyTask, classifyWithAI } from './classifier.js';
+import { migrateFromLocalStorage, getTasks, saveTasks, getGoals as dbGetGoals, saveGoals as dbSaveGoals, getPomodoro, savePomodoro, getNotifications, saveNotifications } from './db.js';
+import { enableSync, pushTasks, pushGoals, pushPomodoro, pushNotifications, isFirebaseConfigured } from './firebase.js';
+
+// Initialize notification plugin (non-blocking)
+async function initNotifications() {
+  try {
+    const mod = await import('@tauri-apps/plugin-notification');
+    window.__notificationPlugin = mod;
+    console.log('Notification plugin loaded');
+    if (mod && mod.requestPermission) {
+      const result = await mod.requestPermission();
       console.log('Notification permission:', result);
-    }).catch(console.error);
+    }
+  } catch (e) {
+    console.log('Notification plugin not available:', e);
+    window.__notificationPlugin = null;
   }
-}).catch(e => console.log('Notification plugin not available:', e));
+}
+initNotifications();
 
 console.log('main.js loaded');
 
-const STORAGE_KEY = 'eisenhower-tasks';
 const AI_API_KEY_STORAGE = 'eisenhower-ai-key';
 
 const GOAL_COLORS = [
@@ -22,25 +30,23 @@ const GOAL_COLORS = [
 ];
 
 // State
-let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-let goals = getGoals();
+let tasks = [];
+let goals = [];
 let selectedTaskId = null;
 let selectedGoalId = null;
 let isRendering = false;
 let aiApiKey = localStorage.getItem(AI_API_KEY_STORAGE) || '';
 
 // Pomodoro Timer State
-const POMODORO_STORAGE = 'eisenhower-pomodoro';
-let pomodoroState = JSON.parse(localStorage.getItem(POMODORO_STORAGE) || JSON.stringify({
+let pomodoroState = {
   duration: 25, // minutes
   remaining: 25 * 60, // seconds
   isRunning: false,
   intervalId: null
-}));
+};
 
 // Notification State
-const NOTIFICATION_STORAGE = 'eisenhower-notifications';
-let notifications = JSON.parse(localStorage.getItem(NOTIFICATION_STORAGE) || '[]');
+let notifications = [];
 let notificationPanelVisible = false;
 
 // DOM refs
@@ -232,7 +238,8 @@ function renderGoals() {
       if (confirm(`Xóa mục tiêu "${goal.text}" và tất cả task liên kết?`)) {
         tasks = tasks.filter(t => t.goalId !== goal.id);
         goals = goals.filter(g => g.id !== goal.id);
-        saveGoals(goals);
+        dbSaveGoals(goals);
+        pushGoals(goals);
         save();
         selectedGoalId = null;
         renderGoals();
@@ -284,12 +291,9 @@ async function addTask(text) {
   // Determine goal
   let goalId = selectedGoalId;
   if (!goalId) {
-    // Try to match with existing goal
-    const matchedGoalText = classifyTask(text); // This just returns text
-    // Actually we should use matchGoals
-    const goalsList = getGoals();
+    // Try to match with existing goal by keyword
     const lower = trimmed.toLowerCase();
-    for (const goal of goalsList) {
+    for (const goal of goals) {
       const goalText = typeof goal === 'string' ? goal : goal.text;
       const goalLower = goalText.toLowerCase();
       const goalWords = goalLower.split(/\s+/);
@@ -463,18 +467,23 @@ function deleteTask(id) {
   renderGoals();
 }
 
-// Save to localStorage
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+// Save to IndexedDB
+async function save() {
+  try {
+    await saveTasks(tasks);
+    pushTasks(tasks);
+  } catch (err) {
+    console.error('Failed to save tasks to IndexedDB:', err);
+  }
 }
 
 // Reset all
-function reset() {
+async function reset() {
   if (tasks.length === 0 && goals.length === 0) return;
   if (!confirm('Xóa tất cả task?')) return;
   tasks = [];
   selectedTaskId = null;
-  save();
+  await save();
   render();
 }
 
@@ -496,7 +505,8 @@ function addGoal(text) {
   if (!trimmed) return;
   if (goals.some(g => g.text.toLowerCase() === trimmed.toLowerCase())) return;
   goals.push({ id: Date.now().toString(), text: trimmed, color: getRandomColor() });
-  saveGoals(goals);
+  dbSaveGoals(goals);
+  pushGoals(goals);
   renderGoals();
   document.getElementById('goals-input').value = '';
 }
@@ -543,8 +553,13 @@ resetBtn.addEventListener('click', reset);
 
 // ============ POMODORO TIMER ============
 
-function savePomodoroState() {
-  localStorage.setItem(POMODORO_STORAGE, JSON.stringify(pomodoroState));
+async function savePomodoroState() {
+  try {
+    await savePomodoro(pomodoroState);
+    pushPomodoro(pomodoroState);
+  } catch (err) {
+    console.error('Failed to save pomodoro state:', err);
+  }
 }
 
 function formatTime(seconds) {
@@ -600,7 +615,11 @@ function playAlarm() {
 }
 
 async function sendNativeNotification(title, body) {
-  // Send Windows/macOS system notification
+  // Only send native notifications when running inside Tauri
+  if (!window.__TAURI__) {
+    console.log('Not in Tauri context, skipping native notification');
+    return;
+  }
   try {
     const plugin = window.__notificationPlugin;
     if (!plugin) {
@@ -689,8 +708,13 @@ function updatePomodoroButtons() {
 
 // ============ NOTIFICATION CENTER ============
 
-function saveNotifications() {
-  localStorage.setItem(NOTIFICATION_STORAGE, JSON.stringify(notifications));
+async function saveNotificationsState() {
+  try {
+    await saveNotifications(notifications);
+    pushNotifications(notifications);
+  } catch (err) {
+    console.error('Failed to save notifications:', err);
+  }
 }
 
 function getUnreadCount() {
@@ -725,7 +749,7 @@ function addNotification(title, message, type = 'info', icon = '🔔') {
   if (notifications.length > 50) {
     notifications = notifications.slice(0, 50);
   }
-  saveNotifications();
+  saveNotificationsState();
   updateNotificationBadge();
   renderNotificationList();
   return notification;
@@ -735,7 +759,7 @@ function markNotificationRead(id) {
   const notification = notifications.find(n => n.id === id);
   if (notification) {
     notification.read = true;
-    saveNotifications();
+    saveNotificationsState();
     updateNotificationBadge();
     renderNotificationList();
   }
@@ -743,14 +767,14 @@ function markNotificationRead(id) {
 
 function markAllNotificationsRead() {
   notifications.forEach(n => n.read = true);
-  saveNotifications();
+  saveNotificationsState();
   updateNotificationBadge();
   renderNotificationList();
 }
 
 function dismissNotification(id) {
   notifications = notifications.filter(n => n.id !== id);
-  saveNotifications();
+  saveNotificationsState();
   updateNotificationBadge();
   renderNotificationList();
 }
@@ -888,10 +912,53 @@ function setupPomodoroUI() {
   updatePomodoroButtons();
 }
 
-// Init
-setupQuadrantClicks();
-setupGoalsUI();
-setupPomodoroUI();
-setupNotificationUI();
-renderGoals();
-render();
+// ============ INIT ============
+
+async function init() {
+  // Migrate from localStorage if needed
+  await migrateFromLocalStorage();
+
+  // Load data from IndexedDB
+  tasks = await getTasks();
+  goals = await dbGetGoals();
+
+  // Load pomodoro state
+  const savedPomodoro = await getPomodoro();
+  if (savedPomodoro) {
+    pomodoroState = { ...pomodoroState, ...savedPomodoro };
+    // Don't restore intervalId - timer should be paused on load
+    pomodoroState.intervalId = null;
+    pomodoroState.isRunning = false;
+  }
+
+  // Load notifications
+  notifications = await getNotifications();
+  if (!notifications) notifications = [];
+
+  // Setup UI
+  setupQuadrantClicks();
+  setupGoalsUI();
+  setupPomodoroUI();
+  setupNotificationUI();
+  renderGoals();
+  render();
+
+  // Enable Firebase sync if configured
+  if (isFirebaseConfigured()) {
+    enableSync(
+      (syncedTasks) => { tasks = syncedTasks; render(); },
+      (syncedGoals) => { goals = syncedGoals; dbSaveGoals(goals); renderGoals(); },
+      (syncedPomodoro) => {
+        pomodoroState = { ...pomodoroState, ...syncedPomodoro };
+        pomodoroState.intervalId = null;
+        pomodoroState.isRunning = false;
+        updatePomodoroDisplay();
+        updatePomodoroButtons();
+      },
+      (syncedNotifications) => { notifications = syncedNotifications; renderNotificationList(); updateNotificationBadge(); }
+    );
+  }
+}
+
+// Start app
+init();

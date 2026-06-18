@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (Firebase config)
+.env
+.env.local
+.env.*.local
+
 # Tauri build output
 src-tauri/target/
 

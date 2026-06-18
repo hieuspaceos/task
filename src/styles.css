@@ -4,16 +4,24 @@
   padding: 0;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   background-color: #f5f5f5;
-  min-height: 100vh;
+  height: 100%;
 }
 
 .app {
   max-width: 1100px;
   margin: 0 auto;
   padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .input-bar {
@@ -55,6 +63,8 @@ body {
 .main-layout {
   display: flex;
   gap: 16px;
+  height: calc(100% - 70px);
+  overflow: hidden;
 }
 
 .matrix {
@@ -62,6 +72,8 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Sidebar */
@@ -71,6 +83,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Pomodoro Section */
