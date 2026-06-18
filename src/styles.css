@@ -1126,9 +1126,13 @@ body {
   .sidebar {
     width: 100%;
     flex-direction: column;
+    position: relative;
+    z-index: 100;
   }
   .goals-section {
     width: 100%;
+    position: relative;
+    z-index: 101;
   }
   .goals-input-row {
     display: flex;
@@ -1142,6 +1146,12 @@ body {
   .add-goal-btn {
     padding: 8px 16px;
     font-size: 18px;
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    z-index: 10;
   }
   #goals-container {
     max-height: 150px;
