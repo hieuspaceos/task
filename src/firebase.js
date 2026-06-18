@@ -199,4 +199,4 @@ export async function pushNotifications(notifications) {
   }
 }
 
-export { isFirebaseConfigured, readCache, syncOnce, fetchFromFirestore, disableSync, isMobile };
+export { isFirebaseConfigured, readCache };
