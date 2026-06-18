@@ -10,13 +10,14 @@
   <meta name="theme-color" content="#2563eb" />
   <!-- Service Worker Registration -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('SW registered:', reg.scope))
-          .catch(err => console.log('SW registration failed:', err));
-      });
-    }
+    // Disabled for Android WebView compatibility
+    // if ('serviceWorker' in navigator) {
+    //   window.addEventListener('load', () => {
+    //     navigator.serviceWorker.register('sw.js')
+    //       .then(reg => console.log('SW registered:', reg.scope))
+    //       .catch(err => console.log('SW registration failed:', err));
+    //   });
+    // }
   </script>
 </head>
 <body>
@@ -76,7 +77,6 @@
             <label>Phút:</label>
             <input type="number" id="pomodoro-duration" min="1" max="120" value="25" />
           </div>
-          <button id="test-notification" class="pomodoro-btn test-btn">🔔 Test Notification</button>
         </div>
 
         <!-- Goals Section -->

@@ -761,8 +761,72 @@ body {
   transition: opacity 0.2s, background-color 0.2s;
 }
 
-.task-list li:hover .task-btn {
+.task-list li:hover .task-btn,
+.task-list li:focus-within .task-btn,
+.task-btn:focus {
   opacity: 1;
+}
+
+/* Mobile: always show buttons on touch devices */
+/* Mobile: always show buttons on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .task-btn {
+    opacity: 1;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  .task-list li {
+    padding-right: 8px;
+  }
+  .tick-btn {
+    font-size: 18px;
+  }
+  .app {
+    max-width: 100%;
+    padding: 8px;
+  }
+  .input-bar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #task-input {
+    flex: 1 1 100%;
+    min-width: 0;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  #reset-btn, .notification-btn {
+    padding: 8px 12px;
+    font-size: 16px;
+  }
+  .pomodoro-section, .goals-section, .settings-section {
+    min-width: 100%;
+    flex: none;
+  }
+  .goals-input-row {
+    flex-wrap: wrap;
+  }
+  #goals-input {
+    flex: 1 1 100%;
+    font-size: 16px;
+  }
+  .add-goal-btn {
+    padding: 8px 16px;
+    font-size: 18px;
+  }
+  .pomodoro-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  #pomodoro-duration {
+    font-size: 16px;
+    padding: 6px;
+  }
+  .quadrant h2 {
+    font-size: 14px;
+  }
+  .task-text {
+    font-size: 14px;
+  }
 }
 
 .task-description {

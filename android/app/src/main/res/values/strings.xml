@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Eisenhower Task</string>
+    <string name="title_activity_main">Eisenhower Task</string>
+    <string name="package_name">com.eisenhower.task</string>
+    <string name="custom_url_scheme">com.eisenhower.task</string>
+</resources>

@@ -901,13 +901,6 @@ function setupPomodoroUI() {
     });
   }
 
-  const testBtn = document.getElementById('test-notification');
-  if (testBtn) {
-    testBtn.addEventListener('click', () => {
-      addNotification('🔔 Test Notification', 'Đây là thông báo test!', 'info', '🔔');
-    });
-  }
-
   updatePomodoroDisplay();
   updatePomodoroButtons();
 }
@@ -915,48 +908,44 @@ function setupPomodoroUI() {
 // ============ INIT ============
 
 async function init() {
-  // Migrate from localStorage if needed
-  await migrateFromLocalStorage();
+  try {
+    await migrateFromLocalStorage();
+    tasks = await getTasks();
+    goals = await dbGetGoals();
 
-  // Load data from IndexedDB
-  tasks = await getTasks();
-  goals = await dbGetGoals();
+    const savedPomodoro = await getPomodoro();
+    if (savedPomodoro) {
+      pomodoroState = { ...pomodoroState, ...savedPomodoro };
+      pomodoroState.intervalId = null;
+      pomodoroState.isRunning = false;
+    }
 
-  // Load pomodoro state
-  const savedPomodoro = await getPomodoro();
-  if (savedPomodoro) {
-    pomodoroState = { ...pomodoroState, ...savedPomodoro };
-    // Don't restore intervalId - timer should be paused on load
-    pomodoroState.intervalId = null;
-    pomodoroState.isRunning = false;
-  }
+    notifications = await getNotifications() || [];
 
-  // Load notifications
-  notifications = await getNotifications();
-  if (!notifications) notifications = [];
+    setupQuadrantClicks();
+    setupGoalsUI();
+    setupPomodoroUI();
+    setupNotificationUI();
 
-  // Setup UI
-  setupQuadrantClicks();
-  setupGoalsUI();
-  setupPomodoroUI();
-  setupNotificationUI();
-  renderGoals();
-  render();
+    renderGoals();
+    render();
 
-  // Enable Firebase sync if configured
-  if (isFirebaseConfigured()) {
-    enableSync(
-      (syncedTasks) => { tasks = syncedTasks; render(); },
-      (syncedGoals) => { goals = syncedGoals; dbSaveGoals(goals); renderGoals(); },
-      (syncedPomodoro) => {
-        pomodoroState = { ...pomodoroState, ...syncedPomodoro };
-        pomodoroState.intervalId = null;
-        pomodoroState.isRunning = false;
-        updatePomodoroDisplay();
-        updatePomodoroButtons();
-      },
-      (syncedNotifications) => { notifications = syncedNotifications; renderNotificationList(); updateNotificationBadge(); }
-    );
+    if (isFirebaseConfigured()) {
+      enableSync(
+        (syncedTasks) => { tasks = syncedTasks; render(); },
+        (syncedGoals) => { goals = syncedGoals; dbSaveGoals(goals); renderGoals(); },
+        (syncedPomodoro) => {
+          pomodoroState = { ...pomodoroState, ...syncedPomodoro };
+          pomodoroState.intervalId = null;
+          pomodoroState.isRunning = false;
+          updatePomodoroDisplay();
+          updatePomodoroButtons();
+        },
+        (syncedNotifications) => { notifications = syncedNotifications; renderNotificationList(); updateNotificationBadge(); }
+      );
+    }
+  } catch (err) {
+    console.error('init() error:', err);
   }
 }
 
