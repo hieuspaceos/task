@@ -104,6 +104,47 @@ export function disableSync() {
   console.log('Firebase sync disabled');
 }
 
+// One-time fetch (no real-time listener - better for mobile)
+export async function fetchFromFirestore(key) {
+  if (!db || !isFirebaseConfigured()) return null;
+  try {
+    const snap = await getDoc(doc(db, 'user_data', key));
+    if (snap.exists()) {
+      const data = snap.data()[key] || snap.data();
+      writeCache(key, data);
+      return data;
+    }
+  } catch (err) {
+    console.error(`Failed to fetch ${key}:`, err);
+  }
+  return null;
+}
+
+// Manual sync - fetch all data one-time (call this on app open or pull-to-refresh)
+export async function syncOnce(onTasksSync, onGoalsSync, onPomodoroSync, onNotificationsSync) {
+  initFirebase();
+  if (!db) return;
+
+  const [tasks, goals, pomodoro, notifications] = await Promise.all([
+    fetchFromFirestore('tasks'),
+    fetchFromFirestore('goals'),
+    fetchFromFirestore('pomodoro'),
+    fetchFromFirestore('notifications')
+  ]);
+
+  if (tasks && onTasksSync) onTasksSync(tasks);
+  if (goals && onGoalsSync) onGoalsSync(goals);
+  if (pomodoro && onPomodoroSync) onPomodoroSync(pomodoro);
+  if (notifications && onNotificationsSync) onNotificationsSync(notifications);
+
+  console.log('Firebase one-time sync complete');
+}
+
+// Detect if mobile
+export function isMobile() {
+  return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
 // Push local changes to Firestore (also updates local cache)
 export async function pushTasks(tasks) {
   // Always update local cache first
@@ -158,4 +199,4 @@ export async function pushNotifications(notifications) {
   }
 }
 
-export { isFirebaseConfigured, readCache };
+export { isFirebaseConfigured, readCache, syncOnce, fetchFromFirestore, disableSync, isMobile };

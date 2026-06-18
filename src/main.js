@@ -1,6 +1,6 @@
 import { classifyTask, classifyWithAI } from './classifier.js';
 import { migrateFromLocalStorage, getTasks, saveTasks, getGoals as dbGetGoals, saveGoals as dbSaveGoals, getPomodoro, savePomodoro, getNotifications, saveNotifications } from './db.js';
-import { enableSync, pushTasks, pushGoals, pushPomodoro, pushNotifications, isFirebaseConfigured, readCache } from './firebase.js';
+import { enableSync, pushTasks, pushGoals, pushPomodoro, pushNotifications, isFirebaseConfigured, readCache, syncOnce, isMobile } from './firebase.js';
 
 // Initialize notification plugin (non-blocking)
 async function initNotifications() {
@@ -990,18 +990,35 @@ async function init() {
     render();
 
     if (isFirebaseConfigured()) {
-      enableSync(
-        (syncedTasks) => { tasks = syncedTasks; render(); },
-        (syncedGoals) => { goals = syncedGoals; dbSaveGoals(goals); renderGoals(); },
-        (syncedPomodoro) => {
-          pomodoroState = { ...pomodoroState, ...syncedPomodoro };
-          pomodoroState.intervalId = null;
-          pomodoroState.isRunning = false;
-          updatePomodoroDisplay();
-          updatePomodoroButtons();
-        },
-        (syncedNotifications) => { notifications = syncedNotifications; renderNotificationList(); updateNotificationBadge(); }
-      );
+      if (isMobile()) {
+        // Mobile: one-time sync only (no real-time listeners = less battery)
+        syncOnce(
+          (syncedTasks) => { tasks = syncedTasks; render(); },
+          (syncedGoals) => { goals = syncedGoals; dbSaveGoals(goals); renderGoals(); },
+          (syncedPomodoro) => {
+            pomodoroState = { ...pomodoroState, ...syncedPomodoro };
+            pomodoroState.intervalId = null;
+            pomodoroState.isRunning = false;
+            updatePomodoroDisplay();
+            updatePomodoroButtons();
+          },
+          (syncedNotifications) => { notifications = syncedNotifications; renderNotificationList(); updateNotificationBadge(); }
+        );
+      } else {
+        // Desktop: real-time sync
+        enableSync(
+          (syncedTasks) => { tasks = syncedTasks; render(); },
+          (syncedGoals) => { goals = syncedGoals; dbSaveGoals(goals); renderGoals(); },
+          (syncedPomodoro) => {
+            pomodoroState = { ...pomodoroState, ...syncedPomodoro };
+            pomodoroState.intervalId = null;
+            pomodoroState.isRunning = false;
+            updatePomodoroDisplay();
+            updatePomodoroButtons();
+          },
+          (syncedNotifications) => { notifications = syncedNotifications; renderNotificationList(); updateNotificationBadge(); }
+        );
+      }
     }
   } catch (err) {
     console.error('init() error:', err);
