@@ -1,6 +1,6 @@
 import { classifyTask, classifyWithAI } from './classifier.js';
 import { migrateFromLocalStorage, getTasks, saveTasks, getGoals as dbGetGoals, saveGoals as dbSaveGoals, getPomodoro, savePomodoro, getNotifications, saveNotifications } from './db.js';
-import { enableSync, pushTasks, pushGoals, pushPomodoro, pushNotifications, isFirebaseConfigured } from './firebase.js';
+import { enableSync, pushTasks, pushGoals, pushPomodoro, pushNotifications, isFirebaseConfigured, readCache } from './firebase.js';
 
 // Initialize notification plugin (non-blocking)
 async function initNotifications() {
@@ -944,17 +944,42 @@ function setupPomodoroUI() {
 async function init() {
   try {
     await migrateFromLocalStorage();
-    tasks = await getTasks();
-    goals = await dbGetGoals();
 
-    const savedPomodoro = await getPomodoro();
-    if (savedPomodoro) {
-      pomodoroState = { ...pomodoroState, ...savedPomodoro };
-      pomodoroState.intervalId = null;
-      pomodoroState.isRunning = false;
+    // Load from Firebase cache first (instant, no Firestore reads)
+    if (isFirebaseConfigured()) {
+      const cachedTasks = readCache('tasks');
+      const cachedGoals = readCache('goals');
+      const cachedPomodoro = readCache('pomodoro');
+      const cachedNotifications = readCache('notifications');
+
+      if (cachedTasks) tasks = cachedTasks;
+      if (cachedGoals) goals = cachedGoals;
+      if (cachedPomodoro) {
+        pomodoroState = { ...pomodoroState, ...cachedPomodoro };
+        pomodoroState.intervalId = null;
+        pomodoroState.isRunning = false;
+      }
+      if (cachedNotifications) notifications = cachedNotifications || [];
     }
 
-    notifications = await getNotifications() || [];
+    // Fallback to IndexedDB if no Firebase cache
+    if (!isFirebaseConfigured() || !readCache('tasks')) {
+      tasks = await getTasks();
+    }
+    if (!isFirebaseConfigured() || !readCache('goals')) {
+      goals = await dbGetGoals();
+    }
+    if (!isFirebaseConfigured() || !readCache('pomodoro')) {
+      const savedPomodoro = await getPomodoro();
+      if (savedPomodoro) {
+        pomodoroState = { ...pomodoroState, ...savedPomodoro };
+        pomodoroState.intervalId = null;
+        pomodoroState.isRunning = false;
+      }
+    }
+    if (!isFirebaseConfigured() || !readCache('notifications')) {
+      notifications = await getNotifications() || [];
+    }
 
     setupQuadrantClicks();
     setupGoalsUI();
