@@ -1,11 +1,12 @@
 # Eisenhower Task Manager - Project Overview & PDR
+*Updated: 2026-06-18*
 
 ## 1. Project Overview
 
 **Name:** Eisenhower Task Manager
-**Type:** Desktop Application (Tauri v2)
+**Type:** Cross-platform Application (Tauri v2 + PWA)
 **Version:** 0.1.0
-**Summary:** A task management app based on the Eisenhower Matrix (4 quadrants), with AI-powered task classification, goals tracking, and Pomodoro timer.
+**Summary:** A task management app based on the Eisenhower Matrix (4 quadrants), with AI-powered task classification, goals tracking, Firebase sync, and Pomodoro timer. Supports both desktop and mobile via responsive design.
 
 ## 2. Tech Stack
 
@@ -13,18 +14,23 @@
 |-------|------------|
 | Frontend | Vanilla HTML, CSS, JavaScript (ES Modules) |
 | Backend | Rust (Tauri v2) |
+| Database | IndexedDB (local) + Firebase Firestore (cloud sync) |
 | Plugins | tauri-plugin-notification, tauri-plugin-autostart |
 | AI API | MiniMax Chat API (OpenAI-compatible) |
+| PWA | Vite PWA plugin for mobile deployment |
 
 ## 3. Project Structure
 
 ```
 task/
 ├── src/                          # Frontend source
-│   ├── main.js                   # Main app logic (678 lines)
+│   ├── main.js                   # Main app logic (~1030 lines)
 │   ├── index.html                # App entry point
-│   ├── styles.css                # All styles (750 lines)
-│   └── classifier.js             # Task classification logic (147 lines)
+│   ├── styles.css                # All styles (~1280 lines)
+│   ├── classifier.js             # Task classification logic (147 lines)
+│   ├── firebase.js               # Firebase sync with cache-first (202 lines)
+│   ├── db.js                     # IndexedDB persistence layer
+│   └── firebase-config.js        # Firebase configuration
 ├── src-tauri/                    # Rust backend
 │   ├── src/
 │   │   ├── lib.rs                # Tauri setup with system tray
@@ -62,7 +68,9 @@ task/
 - Visual progress bar
 - Audio alarm (3 beeps via Web Audio API)
 - Desktop notifications via Tauri plugin
-- State persistence in localStorage
+- State persistence in localStorage + Firebase sync
+- **Mobile:** Floating FAB button + fullscreen popup
+- **Desktop:** Sidebar widget
 
 #### F5: System Integration
 - System tray with show/quit menu
@@ -111,12 +119,22 @@ task/
 | `eisenhower-pomodoro` | PomodoroState |
 | `eisenhower-ai-key` | string (API key) |
 
-### 4.4 Non-Functional Requirements
+### 4.4 Firebase Sync Architecture
 
-- **Responsive:** Adapts to mobile (single column) at 800px and 500px breakpoints
-- **Persistent:** All data stored in localStorage
+- **Cache-first:** All reads go to localStorage cache first (instant, no Firestore cost)
+- **Dual sync modes:**
+  - Desktop: `enableSync()` uses real-time `onSnapshot` listeners
+  - Mobile: `syncOnce()` uses one-time `getDoc()` fetch (battery optimization)
+- **Offline-safe:** All `push*()` functions update cache first, then Firestore
+- **Mobile detection:** `isMobile()` via `navigator.userAgent` regex
+
+### 4.5 Non-Functional Requirements
+
+- **Responsive:** Mobile-first design with touch-optimized UI at `hover: none and (pointer: coarse)` breakpoint
+- **Persistent:** IndexedDB primary + Firebase cloud sync + localStorage cache
 - **Offline:** Core features work without AI API key
 - **Cross-platform:** Tauri v2 supports Windows, macOS, Linux
+- **Mobile-ready:** PWA deployment via Vite PWA plugin
 
 ## 5. UI Layout
 

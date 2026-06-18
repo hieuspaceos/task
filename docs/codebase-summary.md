@@ -1,8 +1,9 @@
 # Codebase Summary
+*Updated: 2026-06-18*
 
 ## Overview
 
-Eisenhower Task Manager is a Tauri v2 desktop application using vanilla HTML/CSS/JS for the frontend and Rust for system integration.
+Eisenhower Task Manager is a Tauri v2 cross-platform application using vanilla HTML/CSS/JS for the frontend and Rust for system integration. Features Firebase Firestore sync with cache-first architecture.
 
 ## File Inventory
 
@@ -10,10 +11,12 @@ Eisenhower Task Manager is a Tauri v2 desktop application using vanilla HTML/CSS
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| `index.html` | 80 | App entry, DOM structure with 4 quadrants + sidebar |
-| `main.js` | 678 | Core app logic: tasks, goals, pomodoro, event handlers |
-| `styles.css` | 750 | All styling: matrix grid, sidebar, modals, responsive |
+| `index.html` | 109 | App entry, DOM structure with 4 quadrants + sidebar + mobile Pomodoro FAB |
+| `main.js` | ~1030 | Core app logic: tasks, goals, pomodoro, Firebase sync, event handlers |
+| `styles.css` | ~1280 | All styling: matrix grid, sidebar, modals, mobile FAB, responsive |
 | `classifier.js` | 147 | Task classification: keywords + AI (MiniMax) |
+| `firebase.js` | 202 | Firebase sync with cache-first, dual sync modes (real-time vs one-time) |
+| `db.js` | - | IndexedDB persistence layer (migrated from localStorage) |
 
 ### Backend (src-tauri/)
 
@@ -29,33 +32,39 @@ Eisenhower Task Manager is a Tauri v2 desktop application using vanilla HTML/CSS
 ### main.js Structure
 
 ```
-State (lines 18-33)
-├── tasks[]          - Task list from localStorage
-├── goals[]          - Goals from localStorage
+State (lines 32-50)
+├── tasks[]          - Task list from IndexedDB
+├── goals[]          - Goals from IndexedDB
 ├── selectedTaskId   - For move-between-quadrants
 ├── selectedGoalId   - For goal filtering
-├── aiApiKey         - Stored in localStorage
-└── pomodoroState    - Timer state
+├── pomodoroState    - Timer state
+├── notifications[]  - In-app notification center
+└── aiApiKey         - Stored in localStorage
 
 Core Functions
-├── buildTaskEl()    - Create task DOM element (line 59)
-├── render()         - Re-render all task lists (line 126)
-├── renderGoals()    - Render goals sidebar (line 143)
-├── addTask()        - Add + classify task (line 243)
-├── toggleTaskDone() - Toggle completion (line 211)
-├── moveToQuadrant() - Move selected task (line 231)
-├── editTask()       - Edit modal (line 332)
-├── deleteTask()     - Delete task (line 415)
-└── save()          - Persist to localStorage (line 424)
+├── buildTaskEl()       - Create task DOM element (line 75)
+├── render()            - Re-render all task lists (line 168)
+├── renderGoals()       - Render goals sidebar (line 185)
+├── addTask()           - Add + classify task (line 286)
+├── toggleTaskDone()    - Toggle completion (line 254)
+├── moveToQuadrant()    - Move selected task (line 274)
+├── editTask()          - Edit modal (line 372)
+├── deleteTask()        - Delete task (line 461)
+├── save()              - Persist to IndexedDB + Firebase (line 471)
 
 Pomodoro Functions
-├── startPomodoro()   - Start timer (line 601)
-├── pausePomodoro()   - Pause timer (line 609)
-├── resetPomodoro()   - Reset timer (line 618)
-├── tickPomodoro()    - Timer tick (line 591)
-├── playAlarm()       - 3 beeps via Web Audio API (line 526)
-├── sendNotification()- Tauri notification (line 559)
-└── onPomodoroComplete() - Handle completion (line 581)
+├── startPomodoro()       - Start timer (line 689)
+├── pausePomodoro()       - Pause timer (line 697)
+├── resetPomodoro()       - Reset timer (line 706)
+├── tickPomodoro()        - Timer tick (line 679)
+├── playAlarm()           - 3 beeps via Web Audio API (line 595)
+├── sendNotification()    - In-app + native notification (line 660)
+└── onPomodoroComplete() - Handle completion (line 669)
+
+Firebase Sync Functions
+├── init()                - Main init with cache-first loading (line 944)
+├── setupPomodoroUI()     - Mobile FAB + popup setup (line 885)
+└── updatePomodoroDisplay() - Updates desktop + FAB + popup displays
 ```
 
 ### classifier.js Structure
@@ -74,6 +83,30 @@ Functions
 │   └── Returns 0 if no match (triggers manual selector)
 └── classifyWithAI() - MiniMax API call (line 110)
     └── Uses OpenAI-compatible endpoint
+```
+
+### firebase.js Structure
+
+```
+Cache Functions
+├── readCache(key)    - Read from localStorage cache (no Firestore cost)
+└── writeCache(key, data) - Write to localStorage cache
+
+Sync Functions
+├── enableSync()        - Real-time listeners (Desktop) - line 57
+├── disableSync()       - Cleanup listeners - line 100
+├── fetchFromFirestore() - One-time fetch - line 108
+├── syncOnce()          - One-time sync (Mobile) - line 124
+└── isMobile()          - Detect mobile via userAgent - line 144
+
+Push Functions (cache-first, offline-safe)
+├── pushTasks()    - Update cache, then Firestore - line 149
+├── pushGoals()    - Update cache, then Firestore - line 163
+├── pushPomodoro() - Update cache, then Firestore - line 176
+└── pushNotifications() - Update cache, then Firestore - line 189
+
+Exports
+└── isFirebaseConfigured, readCache, isMobile, enableSync, disableSync, syncOnce, fetchFromFirestore, push*
 ```
 
 ### lib.rs Structure
@@ -144,26 +177,45 @@ classifyTask(text)
 └─► no match → return 0 (manual selection required)
 ```
 
-## LocalStorage Schema
+## LocalStorage Schema (Firebase Cache Keys)
 
 ```javascript
-// Tasks: 'eisenhower-tasks'
-[
-  { id: "1712345678901", text: "Hoàn thành báo cáo", quadrant: 1, goalId: null, done: false },
-  { id: "1712345678902", text: "Họp team", quadrant: 2, goalId: "1712345678001", done: true }
-]
+// Firebase cache keys (localStorage)
+'eisenhower_tasks_cache'         // Task[] - cache-first read
+'eisenhower_goals_cache'         // Goal[]
+'eisenhower_pomodoro_cache'      // PomodoroState
+'eisenhower_notifications_cache' // Notification[]
 
-// Goals: 'eisenhower-goals'
-[
-  { id: "1712345678001", text: "Dự án A", color: "#6366f1" }
-]
-
-// Pomodoro: 'eisenhower-pomodoro'
-{ duration: 25, remaining: 1500, isRunning: false, intervalId: null }
-
-// AI Key: 'eisenhower-ai-key'
-"eyJhbGciOiJ..."
+// Original localStorage keys (legacy/migration)
+'eisenhower-tasks'
+'eisenhower-goals'
+'eisenhower-pomodoro'
+'eisenhower-ai-key'
 ```
+
+## Firebase Sync Flow
+
+```
+App Init (main.js:init)
+    │
+    ├─► readCache('tasks') ──► instant UI load (no Firestore cost)
+    ├─► readCache('goals')
+    ├─► readCache('pomodoro')
+    └─► readCache('notifications')
+    │
+    ├─► isMobile()? ─► YES ─► syncOnce() ─► one-time getDoc() fetch
+    │                                        (battery optimization)
+    │
+    └─► isMobile()? ─► NO ─► enableSync() ─► onSnapshot listeners
+    │                                     (real-time sync)
+```
+
+## Mobile UI Pattern
+
+- **Touch detection:** `@media (hover: none) and (pointer: coarse)`
+- **Pomodoro FAB:** Fixed bottom-right, 60x60px circular button
+- **Pomodoro Popup:** Fullscreen overlay with centered timer controls
+- **Goals add button:** `min-width: 44px`, `min-height: 44px`, `touch-action: manipulation`
 
 ## Event Flow
 

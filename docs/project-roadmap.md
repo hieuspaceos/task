@@ -1,4 +1,5 @@
 # Project Roadmap
+*Updated: 2026-06-18*
 
 ## Version 0.1.0 (Current)
 
@@ -14,7 +15,10 @@
 - [x] Pomodoro timer with notifications
 - [x] System tray integration
 - [x] Autostart on login
-- [x] Data persistence (localStorage)
+- [x] Data persistence (IndexedDB + Firebase sync)
+- [x] Firebase cloud sync (cache-first, dual sync modes)
+- [x] Mobile UI with Pomodoro FAB + popup
+- [x] Touch-optimized mobile controls (44px touch targets)
 
 ### Known Limitations
 
@@ -110,3 +114,25 @@
 - Pomodoro timer with desktop notifications
 - System tray integration
 - Autostart on macOS login
+
+### v0.1.1 (2026-06-18) - Mobile Redesign + Firebase Optimization
+
+**Mobile UI Redesign:**
+- Pomodoro moved from sidebar to floating FAB button + fullscreen popup
+- CSS media query `@media (hover: none) and (pointer: coarse)` for touch devices
+- Pomodoro FAB: `display:flex`, `position:fixed bottom:20px right:20px`
+- Pomodoro Popup: fullscreen overlay with `display:flex`/`visibility` toggle
+- Goals add button: `touch-action: manipulation`, `min-width:44px`, `min-height:44px` for better touch
+- Desktop Pomodoro restored in sidebar
+
+**Firebase Sync Optimization:**
+- LocalStorage cache-first: `readCache()`/`writeCache()` functions eliminate Firestore reads on cold load
+- Two sync modes:
+  - Desktop: `enableSync()` uses real-time `onSnapshot` listeners
+  - Mobile: `syncOnce()` uses one-time `getDoc()` fetch (battery optimization)
+- `isMobile()` detection via `navigator.userAgent` regex
+- All `push*()` functions update cache first, then Firestore (offline-safe)
+
+**Bug Fixes:**
+- Duplicate exports in firebase.js fixed
+- `resetBtn` null check added (element removed from mobile HTML)

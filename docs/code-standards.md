@@ -1,4 +1,5 @@
 # Code Standards
+*Updated: 2026-06-18*
 
 ## Overview
 
@@ -53,10 +54,41 @@ async function classifyWithAI(text, apiKey) {
 
 ### State Management
 
-- All state stored in localStorage for persistence
+- Primary state stored in IndexedDB via `db.js` persistence layer
+- Firebase sync state cached in localStorage for cache-first reads
 - State accessed via module-level variables
 - State mutations trigger `render()` calls
-- Use `save()` function to persist state
+- Use `save()` function to persist state (IndexedDB + Firebase)
+
+### Firebase Sync Patterns
+
+```javascript
+// Cache-first read (no Firestore cost on cold load)
+const cached = readCache('tasks');
+if (cached) {
+  // Use cache immediately for instant UI
+  renderTasks(cached);
+}
+
+// Mobile: one-time fetch (battery optimization)
+if (isMobile()) {
+  syncOnce(onTasksSync, onGoalsSync, onPomodoroSync, onNotificationsSync);
+} else {
+  // Desktop: real-time sync
+  enableSync(onTasksSync, onGoalsSync, onPomodoroSync, onNotificationsSync);
+}
+
+// Offline-safe push (cache first, then Firestore)
+export async function pushTasks(tasks) {
+  writeCache('tasks', tasks); // Always update cache first
+  if (!db || !isFirebaseConfigured()) return;
+  try {
+    await setDoc(doc(db, 'user_data', 'tasks'), { tasks, updatedAt: serverTimestamp() }, { merge: true });
+  } catch (err) {
+    console.error('Failed to push tasks:', err);
+  }
+}
+```
 
 ### Error Handling
 
@@ -72,6 +104,9 @@ try {
 
 // Confirmation for destructive actions
 if (!confirm('Xóa mục tiêu và tất cả task liên kết?')) return;
+
+// Null checks for optional DOM elements (mobile/desktop differences)
+if (resetBtn) resetBtn.addEventListener('click', reset);
 ```
 
 ## CSS Standards
@@ -196,10 +231,28 @@ pub fn run() {
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `eisenhower-tasks` | Task[] | All tasks |
-| `eisenhower-goals` | Goal[] | All goals |
-| `eisenhower-pomodoro` | PomodoroState | Timer state |
+| `eisenhower-tasks` | Task[] | All tasks (IndexedDB) |
+| `eisenhower-goals` | Goal[] | All goals (IndexedDB) |
+| `eisenhower-pomodoro` | PomodoroState | Timer state (IndexedDB) |
 | `eisenhower-ai-key` | string | MiniMax API key |
+| `eisenhower_tasks_cache` | Task[] | Firebase cache (localStorage) |
+| `eisenhower_goals_cache` | Goal[] | Firebase cache |
+| `eisenhower_pomodoro_cache` | PomodoroState | Firebase cache |
+| `eisenhower_notifications_cache` | Notification[] | Firebase cache |
+
+## Quality Checklist
+
+- [ ] No syntax errors - code compiles/runs
+- [ ] All event handlers properly bound
+- [ ] Null checks for mobile-only or desktop-only DOM elements
+- [ ] localStorage/IndexedDB serialization handles empty state
+- [ ] Error handling for API calls and Firebase operations
+- [ ] Confirmation dialogs for destructive actions
+- [ ] Timer cleanup on pause/reset
+- [ ] Responsive breakpoints tested
+- [ ] Touch targets minimum 44px on mobile
+- [ ] Firebase sync works offline (cache-first)
+- [ ] Dual sync mode: real-time (desktop) vs one-time (mobile)
 
 ## Quality Checklist
 

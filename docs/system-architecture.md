@@ -1,8 +1,9 @@
 # System Architecture
+*Updated: 2026-06-18*
 
 ## Overview
 
-Eisenhower Task Manager is a Tauri v2 desktop application with a layered architecture separating UI, business logic, and system integration.
+Eisenhower Task Manager is a Tauri v2 cross-platform application with a layered architecture separating UI, business logic, data persistence, and system integration. Features Firebase Firestore sync with cache-first architecture for optimal performance.
 
 ## Architecture Layers
 
@@ -21,9 +22,18 @@ Eisenhower Task Manager is a Tauri v2 desktop application with a layered archite
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
-│        Data Layer (localStorage)         │
+│        Data Layer (IndexedDB + Cache)    │
+│  • IndexedDB primary persistence        │
+│  • LocalStorage cache (Firebase sync)   │
 │  • Tasks, Goals, Pomodoro state        │
 │  • API key storage                      │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│       Sync Layer (Firebase Firestore)   │
+│  • Cache-first reads                    │
+│  • Dual sync modes (real-time/one-time)│
+│  • Offline-safe push operations          │
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
@@ -108,8 +118,8 @@ startPomodoro()
 Every second: tickPomodoro()
         │
         ├─► pomodoroState.remaining--
-        ├─► updatePomodoroDisplay()
-        └─► savePomodoroState()
+        ├─► updatePomodoroDisplay() (updates desktop + FAB + popup)
+        └─► savePomodoroState() (IndexedDB + Firebase)
         │
         ▼
 remaining === 0
@@ -120,8 +130,55 @@ onPomodoroComplete()
         ├─► pomodoroState.isRunning = false
         ├─► clearInterval(intervalId)
         ├─► playAlarm() → 3 beeps (Web Audio API)
-        ├─► sendNotification() → Tauri plugin
+        ├─► sendNotification() → in-app + native
         └─► updatePomodoroButtons()
+```
+
+### Firebase Sync Flow
+
+```
+Mobile (syncOnce - one-time fetch)
+┌──────────────────────────────────────┐
+│  App Init                            │
+│    ├─► readCache() → instant UI      │
+│    └─► syncOnce() → getDoc() once    │
+│         (no real-time listeners)     │
+└──────────────────────────────────────┘
+
+Desktop (enableSync - real-time)
+┌──────────────────────────────────────┐
+│  App Init                            │
+│    ├─► readCache() → instant UI      │
+│    └─► enableSync() → onSnapshot     │
+│         (real-time listeners)        │
+└──────────────────────────────────────┘
+
+Push (both modes - offline-safe)
+┌──────────────────────────────────────┐
+│  pushTasks()/pushGoals() etc.       │
+│    ├─► writeCache() → localStorage  │
+│    └─► setDoc() → Firestore          │
+│         (cache updated first)        │
+└──────────────────────────────────────┘
+```
+
+### Mobile UI Architecture
+
+```
+Touch Device Detection
+└── @media (hover: none) and (pointer: coarse)
+
+Mobile Layout
+├── Pomodoro FAB (fixed bottom-right)
+│   └── Opens fullscreen popup on tap
+├── Pomodoro Popup (fullscreen overlay)
+│   ├── Timer display (48px font)
+│   ├── Duration input
+│   └── Start/Pause/Reset controls
+└── Goals add button (44x44px touch target)
+
+Desktop Layout
+└── Pomodoro sidebar section (always visible)
 ```
 
 ## Module Responsibilities
@@ -213,6 +270,7 @@ localStorage
 | > 800px | Side-by-side: matrix + sidebar |
 | <= 800px | Stacked: matrix above, sidebar below (flex-wrap) |
 | <= 500px | Single column, full-width inputs |
+| `hover:none AND pointer:coarse` | Mobile: touch-optimized, Pomodoro FAB, hidden sidebar widgets |
 
 ## Key Design Decisions
 
