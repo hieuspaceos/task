@@ -1064,3 +1064,206 @@ body {
     font-size: 24px;
   }
 }
+
+/* ==================== MOBILE LAYOUT (hover: none) ==================== */
+@media (hover: none) and (pointer: coarse) {
+  .app {
+    max-width: 100%;
+    padding: 8px;
+    padding-bottom: 80px;
+  }
+  .input-bar {
+    gap: 8px;
+  }
+  #task-input {
+    flex: 1;
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+  .notification-btn {
+    padding: 10px;
+    font-size: 18px;
+  }
+  #reset-btn {
+    display: none;
+  }
+  .main-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  .matrix {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: auto;
+  }
+  .quadrant {
+    min-height: 120px;
+    max-height: 200px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .quadrant h2 {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 8px;
+    margin: 0;
+    font-size: 13px;
+    z-index: 1;
+  }
+  .task-list {
+    padding: 4px 8px;
+  }
+  .task-btn {
+    opacity: 1;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  .tick-btn {
+    font-size: 18px;
+  }
+  .sidebar {
+    width: 100%;
+    flex-direction: column;
+  }
+  .goals-section {
+    width: 100%;
+  }
+  .goals-input-row {
+    display: flex;
+    gap: 8px;
+  }
+  #goals-input {
+    flex: 1;
+    font-size: 14px;
+    padding: 8px;
+  }
+  .add-goal-btn {
+    padding: 8px 16px;
+    font-size: 18px;
+  }
+  #goals-container {
+    max-height: 150px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .settings-section {
+    display: none;
+  }
+  .pomodoro-section {
+    display: none;
+  }
+  /* Pomodoro FAB */
+  .pomodoro-fab {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 900;
+    cursor: pointer;
+  }
+  .pomodoro-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .pomodoro-popup.show {
+    display: flex;
+  }
+  .pomodoro-popup-content {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    width: 280px;
+    text-align: center;
+  }
+  .pomodoro-popup-timer {
+    font-size: 48px;
+    font-weight: bold;
+    color: #2563eb;
+    margin: 16px 0;
+  }
+  .pomodoro-popup-duration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .pomodoro-popup-duration input {
+    width: 60px;
+    padding: 8px;
+    font-size: 16px;
+    text-align: center;
+  }
+  .pomodoro-popup-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .pomodoro-popup-controls .pomodoro-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+  }
+  .pomodoro-popup-controls .start {
+    background: #22c55e;
+    color: white;
+  }
+  .pomodoro-popup-controls .pause {
+    background: #f59e0b;
+    color: white;
+  }
+  .pomodoro-popup-controls .reset {
+    background: #e5e7eb;
+    color: #333;
+  }
+  .pomodoro-popup-close {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px;
+  }
+  .notification-panel {
+    position: fixed;
+    top: 60px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-height: 70vh;
+  }
+}
+
+/* ==================== DESKTOP POMODORO (hide on mobile) ==================== */
+@media (hover: hover), (pointer: fine) {
+  .pomodoro-fab {
+    display: none;
+  }
+  .pomodoro-popup {
+    display: none !important;
+  }
+}

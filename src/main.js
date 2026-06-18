@@ -571,8 +571,19 @@ function formatTime(seconds) {
 function updatePomodoroDisplay() {
   const display = document.getElementById('pomodoro-display');
   const progress = document.getElementById('pomodoro-progress');
+  const fabDisplay = document.getElementById('pomodoro-fab-display');
+  const popupDisplay = document.getElementById('pomodoro-popup-display');
+
+  const timeStr = formatTime(pomodoroState.remaining);
+
   if (display) {
-    display.textContent = formatTime(pomodoroState.remaining);
+    display.textContent = timeStr;
+  }
+  if (fabDisplay) {
+    fabDisplay.textContent = timeStr;
+  }
+  if (popupDisplay) {
+    popupDisplay.textContent = timeStr;
   }
   if (progress) {
     const total = pomodoroState.duration * 60;
@@ -897,6 +908,29 @@ function setupPomodoroUI() {
           updatePomodoroDisplay();
         }
         savePomodoroState();
+      }
+    });
+  }
+
+  // Mobile FAB setup
+  const fab = document.getElementById('pomodoro-fab');
+  const popup = document.getElementById('pomodoro-popup');
+  const popupClose = document.getElementById('pomodoro-popup-close');
+
+  if (fab && popup) {
+    fab.addEventListener('click', () => {
+      popup.classList.add('show');
+    });
+  }
+  if (popupClose) {
+    popupClose.addEventListener('click', () => {
+      popup.classList.remove('show');
+    });
+  }
+  if (popup) {
+    popup.addEventListener('click', (e) => {
+      if (e.target === popup) {
+        popup.classList.remove('show');
       }
     });
   }

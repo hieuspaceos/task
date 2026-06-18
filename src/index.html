@@ -8,23 +8,11 @@
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#2563eb" />
-  <!-- Service Worker Registration -->
-  <script>
-    // Disabled for Android WebView compatibility
-    // if ('serviceWorker' in navigator) {
-    //   window.addEventListener('load', () => {
-    //     navigator.serviceWorker.register('sw.js')
-    //       .then(reg => console.log('SW registered:', reg.scope))
-    //       .catch(err => console.log('SW registration failed:', err));
-    //   });
-    // }
-  </script>
 </head>
 <body>
   <div class="app">
     <header class="input-bar">
       <input type="text" id="task-input" placeholder="Nhập task..." autocomplete="off" />
-      <button id="reset-btn" title="Xóa tất cả">↻</button>
       <button id="notification-btn" class="notification-btn" title="Thông báo">
         <span class="notification-icon">🔔</span>
         <span id="notification-badge" class="notification-badge" style="display:none">0</span>
@@ -61,46 +49,43 @@
       </main>
 
       <aside class="sidebar">
-        <!-- Pomodoro Section -->
-        <div class="pomodoro-section">
-          <h3>Pomodoro</h3>
-          <div class="pomodoro-timer">
-            <div id="pomodoro-progress" class="pomodoro-progress"></div>
-            <span id="pomodoro-display" class="pomodoro-display">25:00</span>
-          </div>
-          <div class="pomodoro-controls">
-            <button id="pomodoro-start" class="pomodoro-btn start">▶ Bắt đầu</button>
-            <button id="pomodoro-pause" class="pomodoro-btn pause" style="display:none">⏸ Tạm dừng</button>
-            <button id="pomodoro-reset" class="pomodoro-btn reset">↺</button>
-          </div>
-          <div class="pomodoro-duration">
-            <label>Phút:</label>
-            <input type="number" id="pomodoro-duration" min="1" max="120" value="25" />
-          </div>
-        </div>
-
-        <!-- Goals Section -->
+        <!-- Goals Section - Compact -->
         <div class="goals-section">
-          <h3>Mục tiêu</h3>
           <div class="goals-input-row">
             <input type="text" id="goals-input" placeholder="Thêm mục tiêu..." autocomplete="off" />
             <button id="goals-add-btn" class="add-goal-btn">+</button>
           </div>
           <div id="goals-container" class="goals-container"></div>
         </div>
-
-        <!-- Settings Section -->
-        <div class="settings-section">
-          <h3>Cài đặt</h3>
-          <button id="api-key-toggle" class="toggle-btn">🔑 API Key</button>
-          <div id="api-key-section" class="api-key-section" style="display: none;">
-            <input type="password" id="api-key-input" placeholder="MiniMax API Key..." />
-            <button id="api-key-save-btn" class="save-key-btn">Lưu</button>
-          </div>
-        </div>
       </aside>
     </div>
   </div>
+
+  <!-- Mobile Pomodoro Floating Button -->
+  <div id="pomodoro-fab" class="pomodoro-fab">
+    <span id="pomodoro-fab-display">25:00</span>
+  </div>
+
+  <!-- Pomodoro Popup -->
+  <div id="pomodoro-popup" class="pomodoro-popup" style="display:none">
+    <div class="pomodoro-popup-content">
+      <h3>🍅 Pomodoro</h3>
+      <div class="pomodoro-popup-timer">
+        <span id="pomodoro-popup-display">25:00</span>
+      </div>
+      <div class="pomodoro-popup-duration">
+        <label>Phút:</label>
+        <input type="number" id="pomodoro-duration" min="1" max="120" value="25" />
+      </div>
+      <div class="pomodoro-popup-controls">
+        <button id="pomodoro-start" class="pomodoro-btn start">▶</button>
+        <button id="pomodoro-pause" class="pomodoro-btn pause" style="display:none">⏸</button>
+        <button id="pomodoro-reset" class="pomodoro-btn reset">↺</button>
+      </div>
+      <button id="pomodoro-popup-close" class="pomodoro-popup-close">Đóng</button>
+    </div>
+  </div>
+
   <script type="module" src="main.js"></script>
 </body>
 </html>
