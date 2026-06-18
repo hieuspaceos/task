@@ -20,6 +20,9 @@ dist-ssr
 # Tauri build output
 src-tauri/target/
 
+# APK files
+*.apk
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
