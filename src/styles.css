@@ -1161,107 +1161,38 @@ body {
   .settings-section {
     display: none;
   }
+  /* Pomodoro inline on mobile - no FAB, no popup */
   .pomodoro-section {
-    display: none;
+    display: block;
+    width: 100%;
+    padding: 10px;
   }
-  /* Pomodoro FAB */
+  .pomodoro-timer {
+    height: 50px;
+  }
+  .pomodoro-display {
+    font-size: 22px;
+  }
+  .pomodoro-controls {
+    gap: 4px;
+  }
+  .pomodoro-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .pomodoro-duration {
+    margin-top: 8px;
+  }
+  .pomodoro-duration input {
+    width: 50px;
+    padding: 4px 6px;
+    font-size: 12px;
+  }
   .pomodoro-fab {
-    display: flex;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #2563eb;
-    color: white;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: bold;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 900;
-    cursor: pointer;
+    display: none !important;
   }
   .pomodoro-popup {
-    display: none;
-    visibility: hidden;
-    opacity: 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-  }
-  .pomodoro-popup.show {
-    visibility: visible;
-    opacity: 1;
-    display: flex;
-  }
-  .pomodoro-popup-content {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    width: 280px;
-    text-align: center;
-  }
-  .pomodoro-popup-timer {
-    font-size: 48px;
-    font-weight: bold;
-    color: #2563eb;
-    margin: 16px 0;
-  }
-  .pomodoro-popup-duration {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .pomodoro-popup-duration input {
-    width: 60px;
-    padding: 8px;
-    font-size: 16px;
-    text-align: center;
-  }
-  .pomodoro-popup-controls {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-  .pomodoro-popup-controls .pomodoro-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    font-size: 20px;
-    border: none;
-    cursor: pointer;
-  }
-  .pomodoro-popup-controls .start {
-    background: #22c55e;
-    color: white;
-  }
-  .pomodoro-popup-controls .pause {
-    background: #f59e0b;
-    color: white;
-  }
-  .pomodoro-popup-controls .reset {
-    background: #e5e7eb;
-    color: #333;
-  }
-  .pomodoro-popup-close {
-    background: transparent;
-    border: none;
-    color: #666;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 8px;
+    display: none !important;
   }
   .notification-panel {
     position: fixed;
